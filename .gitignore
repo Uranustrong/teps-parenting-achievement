@@ -1,0 +1,26 @@
+# 預設忽略 repo 根目錄下的所有項目，再以 ! 白名單需要的（避免舊方向的檔案誤入版控）
+/*
+!/教養分析/
+!/Data/
+!/README.md
+!/.gitignore
+
+# Data/：只保留「如何取得資料」的說明；TEPS 原始 .dta 受授權規範，不納入版控
+/Data/*
+!/Data/stata/
+/Data/stata/*
+!/Data/stata/README.md
+
+# 教養分析/ 內的排除項
+# 個體層級衍生檔（含逐人 stud_id，比照原始資料、不散布；執行時自動重新產生）
+教養分析/outputs/caregiver_rebuild/
+教養分析/outputs/dr_scoring/
+# 開發過程的原始腳本備份，重現不需要
+教養分析/scripts/原版備份/
+# 舊清理檔問題的內部紀錄，非重現所需
+教養分析/reports/清理檔照顧者欄位問題報告.md
+
+# 系統 / 暫存檔
+.DS_Store
+.Rhistory
+.Rproj.user/
