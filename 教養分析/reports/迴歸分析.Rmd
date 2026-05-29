@@ -110,7 +110,31 @@ kable(of, col.names = c("模型", "R²", "adj R²"), align = "lrr",
 這個數字本身的意義會在 §6、§8 與「常見疑問」討論（先講結論：R² 小不等於 D／R
 不重要）；重點先放在**係數的方向與穩定性**。
 
-不過光看係數有點抽象。下一節把這個交互模型的預測值畫成熱圖，型態會更直觀。
+## 穩健性：同一個模型套到三個成就指標
+
+TEPS 測驗提供三個 3-PL（3 參數 IRT）能力估計值——**綜合**（`w2all3p`，本報告主分析）、
+**數學**（`w2m3p`）、**一般分析**（`w2cf3p`）；三者高度相關
+（r = `r sprintf("%.2f", min(outcome_cor[lower.tri(outcome_cor)]))`–`r sprintf("%.2f", max(outcome_cor[lower.tri(outcome_cor)]))`，
+綜合可視為數學與一般的合成）。把上面同一個交互模型 `成就 ~ D × R` 分別套到三個指標：
+
+```{r outcome-compare}
+oco <- outcome_compare
+disp_oc <- data.frame(
+  `成就指標` = oco$指標, n = oco$n,
+  `β_D（要求）` = mapply(b, oco$beta_D, oco$D_p),
+  `β_R（回應）` = mapply(b, oco$beta_R, oco$R_p),
+  `β_DR（交互）` = mapply(b, oco$beta_DR, oco$DR_p),
+  `adj R²` = sprintf("%.4f", oco$adjR2),
+  check.names = FALSE)
+kable(disp_oc, align = "lrrrrr",
+      caption = "同一 D×R 交互模型套到三個成就指標的係數（*** p<.001, ** p<.01, * p<.05, . p<.10）")
+```
+
+**讀法**：三個指標的 D、R、D×R 係數**方向完全一致**（要求 D 恆負、回應 R 恆正、交互
+恆負），僅大小略有差異——教養與成就的關聯型態**不限於單一能力領域**，在數學與一般
+推理上都成立。因綜合分析能力同時涵蓋兩者，§3–§7 的後續分析以它為主要結果。
+
+光看係數有點抽象。下一節把（綜合分析能力的）交互模型預測值畫成熱圖，型態會更直觀。
 
 # 迴歸預測熱圖
 

@@ -5,7 +5,8 @@
 # 以線性迴歸分析。
 #
 # 分析內容：
-#   1. 全體模型：score ~ D + R（加法）、score ~ D * R（含交互）。
+#   1. 全體模型：score ~ D + R（加法）、score ~ D * R（含交互）；交互模型另套到三個
+#      成就指標（綜合 / 數學 / 一般分析）做穩健性對照。
 #   2. 迴歸預測熱圖：由 D*R 模型在 D×R 平面上的預測曲面。
 #   3. 分層迴歸：固定城鄉 / 公私立 / 偏遠後，比較各層的截距與 D、R、D×R 斜率，
 #      並以巢狀 F 檢定正式檢定「截距是否差」與「斜率是否隨該變項改變」。
@@ -74,6 +75,25 @@ aov_int <- anova(M_add, M_int)   # 交互項是否顯著改善模型
 write.csv(overall_coef, file.path(out_dir, "coef_overall.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")
 write.csv(overall_fit,  file.path(out_dir, "fit_overall.csv"),
+          row.names = FALSE, fileEncoding = "UTF-8")
+
+# ---- outcome-compare ----
+# 穩健性：同一個 D*R 交互模型，分別套到三個 TEPS 成就指標（綜合 / 數學 / 一般分析）。
+# 三者高度相關，看 D、R、D×R 的係數方向是否一致（教養型態是否不限單一能力領域）。
+outcomes <- c(w2all3p = "綜合分析能力（主）",
+              w2m3p   = "數學分析能力",
+              w2cf3p  = "一般分析能力")
+outcome_cor <- cor(sapply(dat[, names(outcomes)], as.numeric), use = "complete.obs")
+outcome_compare <- do.call(rbind, lapply(names(outcomes), function(y) {
+  m  <- lm(as.formula(paste(y, "~ D_c * R_c")), data = dat)
+  co <- summary(m)$coefficients
+  data.frame(指標 = outcomes[[y]], 變項 = y, n = nobs(m),
+             beta_D = co["D_c", 1],      D_p  = co["D_c", 4],
+             beta_R = co["R_c", 1],      R_p  = co["R_c", 4],
+             beta_DR = co["D_c:R_c", 1], DR_p = co["D_c:R_c", 4],
+             adjR2 = summary(m)$adj.r.squared, row.names = NULL)
+}))
+write.csv(outcome_compare, file.path(out_dir, "coef_by_outcome.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")
 
 # ---- regression-heatmap ----
@@ -372,6 +392,12 @@ cat(sprintf("\n交互項是否顯著改善（D+R vs D*R）：F = %.2f, p = %.3g\
 cat("\nD*R 交互模型係數：\n")
 ct <- coef_tab(M_int, "D*R")[, -1]; ct[, -1] <- round(ct[, -1], 4)
 print(ct, row.names = FALSE)
+
+cat("\n========== 三個成就指標的 D*R 係數（穩健性）==========\n")
+oc <- outcome_compare
+oc[, c("beta_D","beta_R","beta_DR","adjR2")] <-
+  round(oc[, c("beta_D","beta_R","beta_DR","adjR2")], 4)
+print(oc[, c("指標","n","beta_D","beta_R","beta_DR","adjR2")], row.names = FALSE)
 
 cat("\n========== 分層迴歸係數 ==========\n")
 print(round(strat_coef[, c("n","截距","beta_D","beta_R","beta_DR","adjR2")], 3))

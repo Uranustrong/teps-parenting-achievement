@@ -11,7 +11,7 @@
 
 <meta name="author" content="心理統計學期末報告小組" />
 
-<meta name="date" content="2026-05-23" />
+<meta name="date" content="2026-05-29" />
 
 <title>迴歸分析：要求 D、回應 R 與學業成就</title>
 
@@ -1581,7 +1581,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">迴歸分析：要求 D、回應 R 與學業成就</h1>
 <h4 class="author">心理統計學期末報告小組</h4>
-<h4 class="date">2026-05-23</h4>
+<h4 class="date">2026-05-29</h4>
 
 </div>
 
@@ -1750,7 +1750,69 @@ p&lt;.10）</caption>
 <p>模型解釋力 <strong>adj R² 僅 2.7%</strong>——很小。
 這個數字本身的意義會在 §6、§8 與「常見疑問」討論（先講結論：R² 小不等於
 D／R 不重要）；重點先放在<strong>係數的方向與穩定性</strong>。</p>
-<p>不過光看係數有點抽象。下一節把這個交互模型的預測值畫成熱圖，型態會更直觀。</p>
+<div id="穩健性同一個模型套到三個成就指標" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span>
+穩健性：同一個模型套到三個成就指標</h2>
+<p>TEPS 測驗提供三個 3-PL（3 參數
+IRT）能力估計值——<strong>綜合</strong>（<code>w2all3p</code>，本報告主分析）、
+<strong>數學</strong>（<code>w2m3p</code>）、<strong>一般分析</strong>（<code>w2cf3p</code>）；三者高度相關
+（r = 0.84–0.95， 綜合可視為數學與一般的合成）。把上面同一個交互模型
+<code>成就 ~ D × R</code> 分別套到三個指標：</p>
+<table>
+<caption>同一 D×R 交互模型套到三個成就指標的係數（*** p&lt;.001, **
+p&lt;.01, * p&lt;.05, . p&lt;.10）</caption>
+<colgroup>
+<col width="27%" />
+<col width="7%" />
+<col width="17%" />
+<col width="17%" />
+<col width="19%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">成就指標</th>
+<th align="right">n</th>
+<th align="right">β_D（要求）</th>
+<th align="right">β_R（回應）</th>
+<th align="right">β_DR（交互）</th>
+<th align="right">adj R²</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">綜合分析能力（主）</td>
+<td align="right">7197</td>
+<td align="right">-0.114***</td>
+<td align="right">0.098***</td>
+<td align="right">-0.054***</td>
+<td align="right">0.0265</td>
+</tr>
+<tr class="even">
+<td align="left">數學分析能力</td>
+<td align="right">7197</td>
+<td align="right">-0.104***</td>
+<td align="right">0.088***</td>
+<td align="right">-0.047***</td>
+<td align="right">0.0182</td>
+</tr>
+<tr class="odd">
+<td align="left">一般分析能力</td>
+<td align="right">7197</td>
+<td align="right">-0.130***</td>
+<td align="right">0.100***</td>
+<td align="right">-0.055***</td>
+<td align="right">0.0194</td>
+</tr>
+</tbody>
+</table>
+<p><strong>讀法</strong>：三個指標的 D、R、D×R
+係數<strong>方向完全一致</strong>（要求 D 恆負、回應 R 恆正、交互
+恆負），僅大小略有差異——教養與成就的關聯型態<strong>不限於單一能力領域</strong>，在數學與一般
+推理上都成立。因綜合分析能力同時涵蓋兩者，§3–§7
+的後續分析以它為主要結果。</p>
+<p>光看係數有點抽象。下一節把（綜合分析能力的）交互模型預測值畫成熱圖，型態會更直觀。</p>
+</div>
 </div>
 <div id="迴歸預測熱圖" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> 迴歸預測熱圖</h1>
@@ -2430,7 +2492,8 @@ baseline 的高低。</li>
 # 以線性迴歸分析。
 #
 # 分析內容：
-#   1. 全體模型：score ~ D + R（加法）、score ~ D * R（含交互）。
+#   1. 全體模型：score ~ D + R（加法）、score ~ D * R（含交互）；交互模型另套到三個
+#      成就指標（綜合 / 數學 / 一般分析）做穩健性對照。
 #   2. 迴歸預測熱圖：由 D*R 模型在 D×R 平面上的預測曲面。
 #   3. 分層迴歸：固定城鄉 / 公私立 / 偏遠後，比較各層的截距與 D、R、D×R 斜率，
 #      並以巢狀 F 檢定正式檢定「截距是否差」與「斜率是否隨該變項改變」。
@@ -2499,6 +2562,25 @@ aov_int &lt;- anova(M_add, M_int)   # 交互項是否顯著改善模型
 write.csv(overall_coef, file.path(out_dir, &quot;coef_overall.csv&quot;),
           row.names = FALSE, fileEncoding = &quot;UTF-8&quot;)
 write.csv(overall_fit,  file.path(out_dir, &quot;fit_overall.csv&quot;),
+          row.names = FALSE, fileEncoding = &quot;UTF-8&quot;)
+
+# ---- outcome-compare ----
+# 穩健性：同一個 D*R 交互模型，分別套到三個 TEPS 成就指標（綜合 / 數學 / 一般分析）。
+# 三者高度相關，看 D、R、D×R 的係數方向是否一致（教養型態是否不限單一能力領域）。
+outcomes &lt;- c(w2all3p = &quot;綜合分析能力（主）&quot;,
+              w2m3p   = &quot;數學分析能力&quot;,
+              w2cf3p  = &quot;一般分析能力&quot;)
+outcome_cor &lt;- cor(sapply(dat[, names(outcomes)], as.numeric), use = &quot;complete.obs&quot;)
+outcome_compare &lt;- do.call(rbind, lapply(names(outcomes), function(y) {
+  m  &lt;- lm(as.formula(paste(y, &quot;~ D_c * R_c&quot;)), data = dat)
+  co &lt;- summary(m)$coefficients
+  data.frame(指標 = outcomes[[y]], 變項 = y, n = nobs(m),
+             beta_D = co[&quot;D_c&quot;, 1],      D_p  = co[&quot;D_c&quot;, 4],
+             beta_R = co[&quot;R_c&quot;, 1],      R_p  = co[&quot;R_c&quot;, 4],
+             beta_DR = co[&quot;D_c:R_c&quot;, 1], DR_p = co[&quot;D_c:R_c&quot;, 4],
+             adjR2 = summary(m)$adj.r.squared, row.names = NULL)
+}))
+write.csv(outcome_compare, file.path(out_dir, &quot;coef_by_outcome.csv&quot;),
           row.names = FALSE, fileEncoding = &quot;UTF-8&quot;)
 
 # ---- regression-heatmap ----
@@ -2797,6 +2879,12 @@ cat(sprintf(&quot;\n交互項是否顯著改善（D+R vs D*R）：F = %.2f, p = 
 cat(&quot;\nD*R 交互模型係數：\n&quot;)
 ct &lt;- coef_tab(M_int, &quot;D*R&quot;)[, -1]; ct[, -1] &lt;- round(ct[, -1], 4)
 print(ct, row.names = FALSE)
+
+cat(&quot;\n========== 三個成就指標的 D*R 係數（穩健性）==========\n&quot;)
+oc &lt;- outcome_compare
+oc[, c(&quot;beta_D&quot;,&quot;beta_R&quot;,&quot;beta_DR&quot;,&quot;adjR2&quot;)] &lt;-
+  round(oc[, c(&quot;beta_D&quot;,&quot;beta_R&quot;,&quot;beta_DR&quot;,&quot;adjR2&quot;)], 4)
+print(oc[, c(&quot;指標&quot;,&quot;n&quot;,&quot;beta_D&quot;,&quot;beta_R&quot;,&quot;beta_DR&quot;,&quot;adjR2&quot;)], row.names = FALSE)
 
 cat(&quot;\n========== 分層迴歸係數 ==========\n&quot;)
 print(round(strat_coef[, c(&quot;n&quot;,&quot;截距&quot;,&quot;beta_D&quot;,&quot;beta_R&quot;,&quot;beta_DR&quot;,&quot;adjR2&quot;)], 3))
